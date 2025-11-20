@@ -1,0 +1,129 @@
+---
+title: "SocialBot Analysis Report"
+output: pdf_document
+fontsize: 11pt
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo=FALSE, message=FALSE, warning=FALSE)
+
+library(readxl)
+library(dplyr)
+library(ggplot2)
+library(tidyr)
+
+df <- read_excel("SocialBot.xlsx") %>%
+  mutate(
+    is_bot = factor(is_bot, levels=c(0,1), labels=c("Human","Bot")),
+    rank_group = cut(urank, breaks=3, labels=c("Low","Medium","High"))
+  )
+```
+
+# 1. Dataset Overview
+```{r}
+overview_tbl <- data.frame(
+  Metric=c("Number of rows", "Number of columns"),
+  Value=c(nrow(df), ncol(df))
+)
+overview_tbl
+```
+
+```{r}
+class_tab <- table(df$is_bot)
+data.frame(
+  AccountType=names(class_tab),
+  Count=as.numeric(class_tab)
+)
+```
+
+# 2. Class Distribution
+```{r}
+ggplot(df, aes(x = is_bot)) +
+  geom_bar(fill = "steelblue") +
+  labs(
+    title = "Number of Human vs Bot Accounts",
+    x = "Account type",
+    y = "Count"
+  ) +
+  theme_minimal()
+```
+
+# 3. Feature Correlations
+```{r}
+num_df <- df %>% select(-is_bot) %>% mutate(across(everything(), as.numeric))
+cor_mat <- cor(num_df, use="pairwise.complete.obs")
+cor_df  <- as.data.frame(as.table(cor_mat))
+colnames(cor_df) <- c("Var1","Var2","Correlation")
+
+ggplot(cor_df, aes(Var1,Var2,fill=Correlation)) +
+  geom_tile() +
+  scale_fill_gradient2(low="darkred", mid="white", high="darkblue", midpoint=0) +
+  theme_minimal() +
+  theme(axis.text.x=element_text(angle=90,hjust=1)) +
+  labs(title="Correlation Heatmap")
+```
+
+# 4. Profile & Popularity
+
+## 4.1 Follower / Following Ratio
+```{r}
+ggplot(df, aes(is_bot, follower_follow_rate, fill=is_bot)) +
+  geom_boxplot(alpha=0.8) +
+  labs(title="Follower/Following Rate", x="Account type", y="Rate") +
+  theme_minimal()
+```
+
+## 4.2 User Rank
+```{r}
+ggplot(df, aes(is_bot, urank, fill=is_bot)) +
+  geom_boxplot(alpha=0.8) +
+  labs(title="User Rank (urank)", x="Account type", y="Rank") +
+  theme_minimal()
+```
+
+# 5. Activity & Engagement
+
+## 5.1 Posting Rate
+```{r}
+ggplot(df, aes(is_bot, post_rate, fill=is_bot)) +
+  geom_violin(trim=FALSE, alpha=0.7) +
+  geom_boxplot(width=0.1, fill="white") +
+  labs(title="Posting Rate", x="Account type", y="Rate") +
+  theme_minimal()
+```
+
+## 5.2 Average Engagement
+```{r}
+engagement_summary <- df %>%
+  group_by(is_bot) %>%
+  summarise(
+    comments=mean(ave_comment,na.rm=TRUE),
+    reposts=mean(ave_repost,na.rm=TRUE),
+    likes=mean(ave_attitudes,na.rm=TRUE)
+  ) %>%
+  pivot_longer(comments:likes, names_to="metric", values_to="value")
+
+ggplot(engagement_summary, aes(metric,value,fill=is_bot)) +
+  geom_col(position="dodge") +
+  labs(title="Average Engagement", x="Metric", y="Value") +
+  theme_minimal()
+```
+
+# 6. Content & Timing
+```{r}
+url_text_long <- df %>%
+  select(is_bot, ave_url, cvar_url, cvar_textlength) %>%
+  pivot_longer(cols=c(ave_url,cvar_url,cvar_textlength),
+               names_to="measure", values_to="value") %>%
+  mutate(measure=recode(measure,
+                        "ave_url"="Average URL use",
+                        "cvar_url"="URL variability",
+                        "cvar_textlength"="Text length variability"))
+
+ggplot(url_text_long, aes(is_bot,value,fill=is_bot)) +
+  geom_boxplot(alpha=0.8) +
+  facet_wrap(~measure, scales="free_y") +
+  labs(title="URL/Text Variability", x="Account type", y="Value") +
+  theme_minimal()
+```
+
