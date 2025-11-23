@@ -1,5 +1,8 @@
 # ui.R ----
 # Defines the Shiny UI as object `ui`
+library(shiny)
+library(shinythemes)
+library(plotly) 
 
 ui <- navbarPage(
   title = "SocialBot Dashboard",
