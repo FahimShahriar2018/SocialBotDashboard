@@ -351,12 +351,13 @@ ui <- dashboardPage(
             div(class = "section-card",
               h4("User Guide"),
               tags$ul(
-                tags$li("Use Overview to see dataset summary."),
-                tags$li("Profile tab shows account ranking metrics."),
-                tags$li("Activity & Engagement shows posting and user activity."),
-                tags$li("Content tab shows text and URL behavior."),
-                tags$li("Interactive Story tab provides multiple tools to explore bot vs human behaviour."),
-                tags$li("AI Graph tab shows an AI-generated visual summary.")
+                tags$li("Overview tab provides a summary of the dataset and basic class statistics."),
+                tags$li("Profile & Popularity tab addresses RQ1 by comparing follower–following ratios, profile completeness, and user rank between humans and bots."),
+                tags$li("Activity & Engagement tab answers RQ2 by visualising posting frequency and engagement metrics such as comments, reposts, and likes."),
+                tags$li("Content & Timing tab relates to RQ3 and RQ4 by examining URL use, text length, emotion signals, and temporal posting behaviour."),
+                tags$li("Interactive Story tab provides multiple exploratory visual tools to understand how behaviour shifts across follower-following rate levels and other factors."),
+                tags$li("AI Graph tab presents an AI-generated correlation heatmap summarising global variable relationships."),
+                tags$li("PCA tab shows dimensionality-reduction visualisations to observe clustering patterns between bots and humans.")
               )
             )
           )
