@@ -3,6 +3,7 @@
 
 library(ggplot2)
 library(plotly)
+library(dplyr)
 
 # IMPORTANT: load data & interactive module BEFORE defining server()
 source("data_prep.R")
@@ -213,8 +214,6 @@ server <- function(input, output, session) {
     }
   )
   
-  # (Old animated_scatter code removed)
-  
   # ---- Content & Timing ----
   
   output$url_textlength_box <- renderPlot({
@@ -276,22 +275,169 @@ server <- function(input, output, session) {
       ggsave(file, plot = g, device = "svg", width = 6, height = 4)
     }
   )
+
+  # ============================================================
+  #                     PCA SECTION
+  # ============================================================
+
+  # ---- Pairwise PCA Plot 1: Follower_Follow_Rate vs cvar_url ----
+  output$pca_pair1 <- renderPlot({
+    ggplot(df, aes(x = follower_follow_rate, y = cvar_url, color = is_bot)) +
+      geom_point(size = 2, alpha = 0.8) +
+      theme_minimal(base_size = 12) +
+      scale_color_manual(values = c("Human" = "steelblue", "Bot" = "red")) +
+      labs(
+        title = "Follower–Follow Rate vs cvar_url",
+        x = "Follower–Follow Rate",
+        y = "cvar_url",
+        color = "User Type"
+      )
+  })
+
+  output$download_pca_pair1 <- downloadHandler(
+    filename = function() "PCA_pair_follower_vs_cvar_url.svg",
+    content = function(file) {
+      p <- ggplot(df, aes(x = follower_follow_rate, y = cvar_url, color = is_bot)) +
+        geom_point(size = 2, alpha = 0.8) +
+        theme_minimal(base_size = 12) +
+        scale_color_manual(values = c("Human" = "steelblue", "Bot" = "red")) +
+        labs(title = "Follower–Follow Rate vs cvar_url")
+      ggsave(file, plot = p, device = "svg", width = 6, height = 4)
+    }
+  )
+
+
+  # ---- Pairwise PCA Plot 2: Follower_Follow_Rate vs uRank ----
+  output$pca_pair2 <- renderPlot({
+    ggplot(df, aes(x = follower_follow_rate, y = urank, color = is_bot)) +
+      geom_point(size = 2, alpha = 0.8) +
+      theme_minimal(base_size = 12) +
+      scale_color_manual(values = c("Human" = "steelblue", "Bot" = "red")) +
+      labs(
+        title = "Follower–Follow Rate vs uRank",
+        x = "Follower–Follow Rate",
+        y = "uRank",
+        color = "User Type"
+      )
+  })
+
+  output$download_pca_pair2 <- downloadHandler(
+    filename = function() "PCA_pair_follower_vs_urank.svg",
+    content = function(file) {
+      p <- ggplot(df, aes(x = follower_follow_rate, y = urank, color = is_bot)) +
+        geom_point(size = 2, alpha = 0.8) +
+        theme_minimal(base_size = 12)
+      ggsave(file, plot = p, device = "svg", width = 6, height = 4)
+    }
+  )
+
+
+  # ---- Whole PCA (PC1 vs PC2) ----
+  output$pca_whole <- renderPlot({
+    
+    # numeric columns
+    numeric_df <- df %>% select(where(is.numeric))
+    feature_cols <- setdiff(colnames(numeric_df), "is_bot")
+    X <- numeric_df[, feature_cols, drop = FALSE]
+
+    # remove zero variance
+    zero_var <- sapply(X, function(v) sd(v, na.rm = TRUE) == 0)
+    X <- X[, !zero_var, drop = FALSE]
+
+    # remove incomplete rows
+    good_rows <- complete.cases(X)
+    X_complete <- X[good_rows, ]
+    bot_labels <- df$is_bot[good_rows]
+
+    # PCA
+    pca_res <- prcomp(X_complete, center = TRUE, scale. = TRUE)
+    pca_df <- as.data.frame(pca_res$x[, 1:2])
+    pca_df$is_bot <- bot_labels
+
+    ggplot(pca_df, aes(x = PC1, y = PC2, color = is_bot)) +
+      geom_point(size = 2, alpha = 0.8) +
+      theme_minimal(base_size = 12) +
+      scale_color_manual(values = c("Human" = "steelblue", "Bot" = "red")) +
+      labs(
+        title = "PCA Scatter Plot (PC1 vs PC2)",
+        x = "PC1",
+        y = "PC2",
+        color = "User Type"
+      )
+  })
+
+  output$download_pca_whole <- downloadHandler(
+    filename = function() "PCA_whole_scatter.svg",
+    content = function(file) {
+      # replicate PCA code
+      numeric_df <- df %>% select(where(is.numeric))
+      feature_cols <- setdiff(colnames(numeric_df), "is_bot")
+      X <- numeric_df[, feature_cols, drop = FALSE]
+
+      zero_var <- sapply(X, function(v) sd(v, na.rm = TRUE) == 0)
+      X <- X[, !zero_var, drop = FALSE]
+
+      good_rows <- complete.cases(X)
+      X_complete <- X[good_rows, ]
+      bot_labels <- df$is_bot[good_rows]
+
+      pca_res <- prcomp(X_complete, center = TRUE, scale. = TRUE)
+      pca_df <- as.data.frame(pca_res$x[, 1:2])
+      pca_df$is_bot <- bot_labels
+
+      p <- ggplot(pca_df, aes(x = PC1, y = PC2, color = is_bot)) +
+        geom_point(size = 2, alpha = 0.8) +
+        theme_minimal(base_size = 12)
+
+      ggsave(file, plot = p, device = "svg", width = 6, height = 4)
+    }
+  )
+
   
-  # ---- Interactive Story (delegated) ----
+  # ---- Interactive Story (delegated to module) ----
   interactive_story_server(input, output, session, df)
   
   
-  # ---- AI-generated Graph ----
+  # ---- AI-generated Graph: new correlation heatmap ----
   
-  output$ai_graph <- renderImage({
-    filename <- file.path("www", "ai_graph.png")
-    list(
-      src = filename,
-      contentType = "image/png",
-      width = "100%",
-      height = "auto"
-    )
-  }, deleteFile = FALSE)
+  output$ai_corr_heatmap <- renderPlot({
+    # 1. numeric columns only (like Correlation_heatmap.R)
+    numeric_df <- df %>%
+      select(where(is.numeric))
+    
+    # 2. correlation matrix
+    corr_mat <- cor(numeric_df, use = "complete.obs")
+    
+    # 3. long format (similar to melt)
+    corr_long <- as.data.frame(as.table(corr_mat))
+    colnames(corr_long) <- c("Var1", "Var2", "Correlation")
+    
+    # 4. heatmap
+    ggplot(corr_long, aes(x = Var2, y = Var1, fill = Correlation)) +
+      geom_tile() +
+      scale_fill_gradient2(
+        low = "blue",
+        high = "red",
+        mid = "white",
+        midpoint = 0,
+        limits = c(-1, 1),
+        name = "Correlation"
+      ) +
+      coord_fixed() +
+      theme_minimal(base_size = 9) +
+      theme(
+        axis.text.x = element_text(
+          angle = 45, hjust = 1, vjust = 1, size = 6
+        ),
+        axis.text.y = element_text(size = 6),
+        panel.grid = element_blank()
+      ) +
+      labs(
+        title = "Correlation Heatmap of Numeric Features",
+        x = NULL,
+        y = NULL
+      )
+  })
   
   # ---- Report Download ----
   
@@ -305,4 +451,15 @@ server <- function(input, output, session) {
       file.copy(temp, file, overwrite = TRUE)
     }
   )
+
+  # ---- Download: Existing Project Report PDF ----
+  output$download_project_report <- downloadHandler(
+    filename = function() {
+      "SocialBot_project_report_group8.pdf"
+    },
+    content = function(file) {
+      file.copy("SocialBot_project_report_group8.pdf", file, overwrite = TRUE)
+    }
+  )
+
 }

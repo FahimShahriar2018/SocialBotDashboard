@@ -26,6 +26,7 @@ ui <- dashboardPage(
       menuItem("Profile & Popularity", tabName = "profile", icon = icon("user")),
       menuItem("Activity & Engagement", tabName = "activity", icon = icon("bolt")),
       menuItem("Content & Timing", tabName = "content", icon = icon("clock")),
+      menuItem("Principal Component Analysis (PCA)", tabName = "pca", icon = icon("chart-line")),
       menuItem("Interactive Story", tabName = "story", icon = icon("film")),
       menuItem("AI-generated Graph", tabName = "ai", icon = icon("robot")),
       menuItem("Report / Download", tabName = "report", icon = icon("download"))
@@ -158,6 +159,38 @@ ui <- dashboardPage(
               h4("Words vs Emotion Tokens"),
               plotOutput("word_emotion_scatter", height = "340px"),
               downloadButton("download_word_emotion_scatter", "Download SVG")
+            )
+          )
+        )
+      ),
+
+      # ------------- PCA TAB -------------
+      tabItem(tabName = "pca",
+        fluidRow(
+          column(
+            6,
+            div(class = "section-card",
+              h4("Follower–Follow Rate vs cvar_url"),
+              plotOutput("pca_pair1", height = "340px"),
+              downloadButton("download_pca_pair1", "Download SVG")
+            )
+          ),
+          column(
+            6,
+            div(class = "section-card",
+              h4("Follower–Follow Rate vs uRank"),
+              plotOutput("pca_pair2", height = "340px"),
+              downloadButton("download_pca_pair2", "Download SVG")
+            )
+          )
+        ),
+        fluidRow(
+          column(
+            12,
+            div(class = "section-card",
+              h4("PCA Scatter Plot (PC1 vs PC2)"),
+              plotOutput("pca_whole", height = "420px"),
+              downloadButton("download_pca_whole", "Download SVG")
             )
           )
         )
@@ -296,8 +329,8 @@ ui <- dashboardPage(
       # ------------- AI GRAPH -------------
       tabItem(tabName = "ai",
         div(class = "section-card",
-          h4("AI-generated Correlation Heatmap"),
-          imageOutput("ai_graph", height = "320px")
+          h4("AI-generated Correlation Heatmap", class = "section-title"),
+          plotOutput("ai_corr_heatmap", height = "420px")
         )
       ),
 
@@ -308,7 +341,9 @@ ui <- dashboardPage(
             6,
             div(class = "section-card",
               h4("Download Project Report"),
-              downloadButton("download_report", "Download Report (PDF)")
+              downloadButton("download_report", "Download Analysis Report (PDF)"),
+              br(), br(),
+              downloadButton("download_project_report", "Download Project Report (PDF)")
             )
           ),
           column(
