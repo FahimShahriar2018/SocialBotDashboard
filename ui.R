@@ -133,8 +133,9 @@ ui <- dashboardPage(
           column(
             12,
             div(class = "section-card",
-              h4("Animated: Engagement vs Follower/Following", class = "section-title"),
-              imageOutput("animated_scatter", height = "260px")
+              h4("Histogram: Follower/Following Rate by Account Type", class = "section-title"),
+              plotOutput("ffr_hist", height = "320px"),
+              downloadButton("download_ffr_hist", "Download SVG")
             )
           )
         )

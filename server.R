@@ -181,51 +181,39 @@ server <- function(input, output, session) {
       theme_minimal()
   })
   
-  # SVG downloads for Activity & Engagement
-  output$download_postrate_violin <- downloadHandler(
-    filename = function() "posting_rate.svg",
+  # NEW: Histogram of follower_follow_rate by account type
+  output$ffr_hist <- renderPlot({
+    ggplot(df, aes(x = follower_follow_rate, fill = is_bot)) +
+      geom_histogram(alpha = 0.6, position = "identity", bins = 30) +
+      scale_fill_manual(values = c("Human" = "skyblue", "Bot" = "red")) +
+      theme_minimal(base_size = 12) +
+      labs(
+        title = "Histogram of Follower/Following Rate by Account Type",
+        x = "Follower/Following rate",
+        y = "Count",
+        fill = "Account type"
+      )
+  })
+  
+  # SVG download for the histogram
+  output$download_ffr_hist <- downloadHandler(
+    filename = function() "hist_follower_follow_rate.svg",
     content = function(file) {
-      g <- ggplot(df, aes(x = is_bot, y = post_rate, fill = is_bot)) +
-        geom_violin(trim = FALSE, alpha = 0.7) +
-        geom_boxplot(width = 0.1, fill = "white", outlier.shape = NA) +
+      g <- ggplot(df, aes(x = follower_follow_rate, fill = is_bot)) +
+        geom_histogram(alpha = 0.6, position = "identity", bins = 30) +
+        scale_fill_manual(values = c("Human" = "skyblue", "Bot" = "red")) +
+        theme_minimal(base_size = 12) +
         labs(
-          x = "Account type",
-          y = "Post rate",
-          title = "Posting Rate Distribution by Account Type"
-        ) +
-        theme_minimal() +
-        theme(legend.position = "none")
+          title = "Histogram of Follower/Following Rate by Account Type",
+          x = "Follower/Following rate",
+          y = "Count",
+          fill = "Account type"
+        )
       ggsave(file, plot = g, device = "svg", width = 6, height = 4)
     }
   )
   
-  output$download_engagement_bars <- downloadHandler(
-    filename = function() "average_engagement.svg",
-    content = function(file) {
-      g <- ggplot(engagement_summary,
-                  aes(x = metric, y = value, fill = is_bot)) +
-        geom_col(position = "dodge") +
-        labs(
-          x = "Engagement metric",
-          y = "Mean value",
-          fill = "Account type",
-          title = "Average Engagement (Comments, Reposts, Likes)"
-        ) +
-        theme_minimal()
-      ggsave(file, plot = g, device = "svg", width = 6, height = 4)
-    }
-  )
-  
-  # Animated GIF (created earlier via gganimate)
-  output$animated_scatter <- renderImage({
-    filename <- file.path("www", "animated_scatter.gif")
-    list(
-      src = filename,
-      contentType = "image/gif",
-      width = "100%",
-      height = "auto"
-    )
-  }, deleteFile = FALSE)
+  # (Old animated_scatter code removed)
   
   # ---- Content & Timing ----
   
