@@ -1,6 +1,12 @@
 # server.R ----
-# Defines the Shiny server as function `server`
 # Uses objects from data_prep.R: df, cor_df, engagement_summary, url_text_long
+
+library(ggplot2)
+library(plotly)
+
+# IMPORTANT: load data & interactive module BEFORE defining server()
+source("data_prep.R")
+source("interactive_animation.R")
 
 server <- function(input, output, session) {
   
@@ -46,7 +52,7 @@ server <- function(input, output, session) {
     
     ggplotly(g, tooltip = c("x", "y", "fill"))
   })
-
+  
   
   # SVG downloads for Overview plots
   output$download_class_bar <- downloadHandler(
@@ -248,8 +254,7 @@ server <- function(input, output, session) {
       theme_minimal()
   })
   
-
-
+  
   # SVG downloads for Content & Timing
   output$download_url_textlength_box <- downloadHandler(
     filename = function() "url_text_variability.svg",
@@ -283,45 +288,10 @@ server <- function(input, output, session) {
       ggsave(file, plot = g, device = "svg", width = 6, height = 4)
     }
   )
-
-    # ---- Interactive Story (Plotly animated scatter) ----
-  output$interactive_story_plot <- renderPlotly({
-    # make sure rank_group exists (it should be created in data_prep.R or you can recreate here)
-    df_plot <- df %>%
-      mutate(
-        rank_group = ifelse(
-          is.na(rank_group),
-          cut(urank, breaks = 3, labels = c("Low", "Medium", "High")),
-          rank_group
-        )
-      )
-    
-    plot_ly(
-      data = df_plot,
-      x = ~follower_follow_rate,
-      y = ~ave_attitudes,
-      color = ~is_bot,
-      frame = ~rank_group,
-      type = "scatter",
-      mode = "markers",
-      hoverinfo = "text",
-      text = ~paste(
-        "Type:", is_bot,
-        "<br>Follower/Following:", round(follower_follow_rate, 2),
-        "<br>Avg likes:", round(ave_attitudes, 2),
-        "<br>Rank group:", rank_group
-      )
-    ) %>%
-      layout(
-        xaxis = list(title = "Follower/Following rate"),
-        yaxis = list(title = "Average likes (ave_attitudes)"),
-        legend = list(title = list(text = "Account type")),
-        title = "Animated story: Engagement vs Follower/Following across rank groups"
-      ) %>%
-      animation_slider(currentvalue = list(prefix = "Rank group: ")) %>%
-      animation_button(x = 1, xanchor = "right", y = 0, yanchor = "bottom")
-  })
-
+  
+  # ---- Interactive Story (delegated) ----
+  interactive_story_server(input, output, session, df)
+  
   
   # ---- AI-generated Graph ----
   
