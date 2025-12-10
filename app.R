@@ -10,9 +10,9 @@ library(plotly)
 
 
 # Source separate components
-source("data_prep.R")  # creates df, cor_df, engagement_summary, url_text_long
-source("ui.R")         # creates ui
-source("server.R")     # creates server function
+source("data_prep.R")  
+source("ui.R")         
+source("server.R")     
 
 # Run the app
 shinyApp(ui = ui, server = server)

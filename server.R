@@ -1,11 +1,9 @@
 # server.R ----
-# Uses objects from data_prep.R: df, cor_df, engagement_summary, url_text_long
 
 library(ggplot2)
 library(plotly)
 library(dplyr)
 
-# IMPORTANT: load data & interactive module BEFORE defining server()
 source("data_prep.R")
 source("interactive_animation.R")
 
@@ -276,9 +274,8 @@ server <- function(input, output, session) {
     }
   )
 
-  # ============================================================
-  #                     PCA SECTION
-  # ============================================================
+
+  # ---- PCA SECTION ----
 
   # ---- Pairwise PCA Plot 1: Follower_Follow_Rate vs cvar_url ----
   output$pca_pair1 <- renderPlot({
@@ -369,7 +366,6 @@ server <- function(input, output, session) {
   output$download_pca_whole <- downloadHandler(
     filename = function() "PCA_whole_scatter.svg",
     content = function(file) {
-      # replicate PCA code
       numeric_df <- df %>% select(where(is.numeric))
       feature_cols <- setdiff(colnames(numeric_df), "is_bot")
       X <- numeric_df[, feature_cols, drop = FALSE]

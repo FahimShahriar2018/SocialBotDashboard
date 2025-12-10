@@ -1,5 +1,5 @@
 # interactive_animation.R ----
-# All Interactive Story logic in one place
+
 
 interactive_story_server <- function(input, output, session, df) {
   library(dplyr)
@@ -207,16 +207,16 @@ interactive_story_server <- function(input, output, session, df) {
   
   # ---- 4. Bot Detection Sandbox: animation state ----
   
-  auto_play <- reactiveVal(FALSE)    # playing or paused
-  auto_idx  <- reactiveVal(1L)       # which account index
+  auto_play <- reactiveVal(FALSE)    
+  auto_idx  <- reactiveVal(1L)       
   
   # Reset index whenever we start playing
   observeEvent(input$sb_play_pause, {
     auto_play(!auto_play())
     if (!isTRUE(auto_play())) {
-      return()  # just paused
+      return()  
     }
-    auto_idx(1L)  # just turned ON -> restart
+    auto_idx(1L)  
   })
   
   # Animation loop: step through accounts, updating sliders
