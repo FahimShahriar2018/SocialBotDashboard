@@ -434,6 +434,62 @@ server <- function(input, output, session) {
         y = NULL
       )
   })
+
+  # ---- Download: AI Correlation Heatmap (SVG) ----
+  output$download_ai_corr_heatmap <- downloadHandler(
+    filename = function() "ai_correlation_heatmap.svg",
+    content = function(file) {
+
+      # ensures the dataset has been loaded via your "Run Analysis" workflow
+      df <- current_df()   # this already has req() inside in your design
+
+      numeric_df <- df %>% dplyr::select(where(is.numeric))
+      corr_mat <- cor(numeric_df, use = "complete.obs")
+
+      corr_long <- as.data.frame(as.table(corr_mat))
+      colnames(corr_long) <- c("Var1", "Var2", "Correlation")
+
+      p <- ggplot(corr_long, aes(x = Var2, y = Var1, fill = Correlation)) +
+        geom_tile() +
+        scale_fill_gradient2(
+          low  = "blue",
+          high = "red",
+          mid  = "white",
+          midpoint = 0,
+          limits = c(-1, 1),
+          name = "Correlation"
+        ) +
+        coord_fixed() +
+        theme_minimal(base_size = 9) +
+        theme(
+          axis.text.x = element_text(angle = 45, hjust = 1, vjust = 1, size = 6),
+          axis.text.y = element_text(size = 6),
+          panel.grid = element_blank()
+        ) +
+        labs(
+          title = "Correlation Heatmap of Numeric Features",
+          x = NULL,
+          y = NULL
+        )
+
+      # Prefer svglite if available
+      if (requireNamespace("svglite", quietly = TRUE)) {
+        ggplot2::ggsave(
+          filename = file,
+          plot = p,
+          device = svglite::svglite,
+          width = 10,
+          height = 4
+        )
+      } else {
+        # fallback to base svg device
+        grDevices::svg(filename = file, width = 10, height = 4)
+        print(p)
+        grDevices::dev.off()
+      }
+    }
+  )
+
   
   # ---- Report Download ----
   
