@@ -349,7 +349,7 @@ ui <- dashboardPage(
           column(
             6,
             div(class = "section-card",
-              h4("User Guide"),
+              h4("Summary"),
               tags$ul(
                 tags$li("Overview tab provides a summary of the dataset and basic class statistics."),
                 tags$li("Profile & Popularity tab addresses RQ1 by comparing follower–following ratios, profile completeness, and user rank between humans and bots."),
