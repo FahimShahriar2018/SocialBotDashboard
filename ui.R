@@ -340,7 +340,8 @@ ui <- dashboardPage(
           column(
             6,
             div(class = "section-card",
-              h4("Download Project Report"),
+              h4("Report Download Options"),
+              actionButton("build_report", "Generate Analysis Report (PDF)"),
               downloadButton("download_report", "Download Analysis Report (PDF)"),
               br(), br(),
               downloadButton("download_project_report", "Download Project Report (PDF)")
