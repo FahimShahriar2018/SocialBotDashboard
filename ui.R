@@ -112,6 +112,17 @@ ui <- dashboardPage(
 
       # ------------- ACTIVITY & ENGAGEMENT -------------
       tabItem(tabName = "activity",
+                fluidRow(
+          column(
+            12,
+            div(class = "section-card",
+              h4("Histogram: Follower/Following Rate by Account Type", class = "section-title"),
+              # plotOutput("ffr_hist", height = "320px"),
+              tags$img( src = "ffr_hist_animated.gif", style = "width:100%; height:320px; object-fit:contain;" ),
+              downloadButton("download_ffr_hist", "Download SVG")
+            )
+          )
+        ),
         fluidRow(
           column(
             6,
@@ -127,17 +138,6 @@ ui <- dashboardPage(
               h4("Average Engagement", class = "section-title"),
               plotOutput("engagement_bars", height = "320px"),
               downloadButton("download_engagement_bars", "Download SVG")
-            )
-          )
-        ),
-        fluidRow(
-          column(
-            12,
-            div(class = "section-card",
-              h4("Histogram: Follower/Following Rate by Account Type", class = "section-title"),
-              # plotOutput("ffr_hist", height = "320px"),
-              tags$img( src = "ffr_hist_animated.gif", style = "width:100%; height:320px; object-fit:contain;" ),
-              downloadButton("download_ffr_hist", "Download SVG")
             )
           )
         )
