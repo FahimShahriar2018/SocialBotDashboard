@@ -78,12 +78,12 @@ ui <- dashboardPage(
               h4("Class Distribution", class = "section-title"),
               plotOutput("class_bar", height = "260px"),
               downloadButton("download_class_bar", "Download SVG")
-            ),
-            div(class = "section-card",
-              h4("Feature Correlations", class = "section-title"),
-              plotlyOutput("corr_heatmap", height = "420px"),
-              downloadButton("download_corr_heatmap", "Download SVG")
             )
+            # div(class = "section-card",
+            #   h4("Feature Correlations", class = "section-title"),
+            #   plotlyOutput("corr_heatmap", height = "420px"),
+            #   downloadButton("download_corr_heatmap", "Download SVG")
+            # )
           )
         )
       ),
@@ -345,6 +345,38 @@ ui <- dashboardPage(
               downloadButton("download_report", "Download Analysis Report (PDF)"),
               br(), br(),
               downloadButton("download_project_report", "Download Project Report (PDF)")
+            )
+          ),
+          # -------- RIGHT: INSTRUCTIONS --------
+          column(
+            6,
+            div(class = "section-card",
+              h4("Instructions"),
+
+              tags$ol(
+                tags$li(
+                  strong("Generate Analysis Report (PDF): "),
+                  "Click this button first to create the analysis report dynamically based on the current dataset. ",
+                  "A progress dialog will appear while the report is being generated."
+                ),
+                tags$li(
+                  strong("Download Analysis Report (PDF): "),
+                  "After generation is complete, click this button to download the generated analysis report."
+                ),
+                tags$li(
+                  strong("Download Project Report (PDF): "),
+                  "Downloads the final static project report submitted for evaluation. ",
+                  "This file is pre-written and does not change."
+                )
+              ),
+
+              tags$hr(),
+
+              tags$p(
+                strong("Note: "),
+                "The analysis report includes dataset overview, visualisations, correlation analysis, PCA results, ",
+                "and summary insights comparing bot and human accounts."
+              )
             )
           ),
           column(
