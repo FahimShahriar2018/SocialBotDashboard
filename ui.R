@@ -379,7 +379,9 @@ ui <- dashboardPage(
                 "and summary insights comparing bot and human accounts."
               )
             )
-          ),
+          )
+        ),
+        fluidRow(
           column(
             6,
             div(class = "section-card",
