@@ -195,22 +195,63 @@ server <- function(input, output, session) {
       )
   })
 
-  output$download_ffr_hist <- downloadHandler(
-    filename = function() "hist_follower_follow_rate.svg",
-    content = function(file) {
-      g <- ggplot(df, aes(x = follower_follow_rate, fill = is_bot)) +
-        geom_histogram(alpha = 0.6, position = "identity", bins = 30) +
-        scale_fill_manual(values = c("Human" = "skyblue", "Bot" = "red")) +
-        theme_minimal(base_size = 12) +
-        labs(
-          title = "Histogram of Follower/Following Rate by Account Type",
-          x = "Follower/Following rate",
-          y = "Count",
-          fill = "Account type"
-        )
-      ggsave(file, plot = g, device = "svg", width = 6, height = 4)
-    }
-  )
+output$download_ffr_hist <- downloadHandler(
+  filename = function() paste0("hist_follower_follow_rate_current_", Sys.Date(), ".svg"),
+  content = function(file) {
+
+    # Match the animated histogram style
+    x_min <- 0
+    x_max <- 1
+    binwidth <- 0.025
+
+    df2 <- df %>%
+      mutate(follower_follow_rate = as.numeric(follower_follow_rate)) %>%
+      filter(!is.na(follower_follow_rate)) %>%
+      mutate(follower_follow_rate = pmax(follower_follow_rate, 0)) %>%
+      filter(follower_follow_rate >= x_min, follower_follow_rate <= x_max)
+
+    breaks <- seq(x_min, x_max + binwidth, by = binwidth)
+
+    hist_df <- df2 %>%
+      mutate(bin_left = cut(
+        follower_follow_rate,
+        breaks = breaks,
+        include.lowest = TRUE,
+        right = FALSE
+      )) %>%
+      count(is_bot, bin_left, name = "n") %>%
+      tidyr::complete(is_bot, bin_left, fill = list(n = 0)) %>%
+      mutate(
+        bin_start = as.numeric(gsub("\\[|\\(|,.*", "", as.character(bin_left))),
+        bin_mid   = bin_start + binwidth / 2
+      ) %>%
+      arrange(is_bot, bin_mid)
+
+    g <- ggplot(hist_df, aes(x = bin_mid, y = n, fill = is_bot)) +
+      geom_col(
+        width = binwidth * 0.98,
+        position = "identity",
+        alpha = 0.60
+      ) +
+      scale_fill_manual(values = c("Human" = "lightblue", "Bot" = "red")) +
+      coord_cartesian(xlim = c(x_min, x_max)) +
+      scale_x_continuous(
+        breaks = c(0, 0.25, 0.50, 0.75, 1.00),
+        labels = sprintf("%.2f", c(0, 0.25, 0.50, 0.75, 1.00))
+      ) +
+      theme_minimal(base_size = 12) +
+      theme(plot.title = element_text(hjust = 0.5)) +
+      labs(
+        title = "Histogram of Follower/Following Rate by Account Type",
+        x = "Follower/Following rate",
+        y = "Count",
+        fill = "Account type"
+      )
+
+    ggsave(file, plot = g, device = "svg", width = 7, height = 4.5)
+  }
+)
+
 
   # ---- Content & Timing ----
 

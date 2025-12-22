@@ -135,7 +135,8 @@ ui <- dashboardPage(
             12,
             div(class = "section-card",
               h4("Histogram: Follower/Following Rate by Account Type", class = "section-title"),
-              plotOutput("ffr_hist", height = "320px"),
+              # plotOutput("ffr_hist", height = "320px"),
+              tags$img( src = "ffr_hist_animated.gif", style = "width:100%; height:320px; object-fit:contain;" ),
               downloadButton("download_ffr_hist", "Download SVG")
             )
           )
