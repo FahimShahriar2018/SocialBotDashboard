@@ -6,7 +6,7 @@ library(ggplot2)
 library(gganimate)
 library(gifski)
 
-# Load data (match the original histogram look: 0.00–1.00 range)
+# Load data
 df <- read_excel("SocialBot.xlsx") %>%
   mutate(
     is_bot = factor(is_bot, levels = c(0, 1), labels = c("Human", "Bot")),
@@ -14,12 +14,12 @@ df <- read_excel("SocialBot.xlsx") %>%
   ) %>%
   filter(!is.na(follower_follow_rate)) %>%
   mutate(follower_follow_rate = pmax(follower_follow_rate, 0)) %>%
-  filter(follower_follow_rate <= 1)   # ✅ makes it look like your previous histogram (0–1)
+  filter(follower_follow_rate <= 1)
 
-# ---- Build bins to look like the old histogram (thin bins) ----
+# ---- Build bins ----
 x_min <- 0
 x_max <- 1
-binwidth <- 0.025                   # ✅ thin bins similar to your old plot
+binwidth <- 0.025                
 breaks <- seq(x_min, x_max + binwidth, by = binwidth)
 
 bin_df <- df %>%
@@ -39,7 +39,7 @@ bin_df <- df %>%
   ) %>%
   arrange(is_bot, bin_mid)
 
-# ---- CUMULATIVE reveal frames (previous bars NEVER disappear) ----
+# ---- CUMULATIVE reveal frames ----
 bin_df2 <- bin_df %>% mutate(bin_id = dense_rank(bin_mid))
 n_bins <- max(bin_df2$bin_id)
 
@@ -47,11 +47,11 @@ anim_df <- tidyr::crossing(frame = 1:n_bins, bin_df2) %>%
   filter(bin_id <= frame) %>%
   arrange(frame, is_bot, bin_mid)
 
-# ---- Plot (match your previous histogram style) ----
+# ---- Plot ----
 p <- ggplot(anim_df, aes(x = bin_mid, y = n, fill = is_bot, group = is_bot)) +
   geom_col(
-    width = binwidth * 0.98,         # ✅ slight gap so bars don’t look “fat”
-    position = "identity",           # overlay like your old plot
+    width = binwidth * 0.98,         
+    position = "identity",           
     alpha = 0.60
   ) +
   scale_fill_manual(values = c("Human" = "lightblue", "Bot" = "red")) +
@@ -62,7 +62,7 @@ p <- ggplot(anim_df, aes(x = bin_mid, y = n, fill = is_bot, group = is_bot)) +
   ) +
   theme_minimal(base_size = 12) +
   theme(
-    plot.title = element_text(hjust = 0.5)  # center title like your previous
+    plot.title = element_text(hjust = 0.5)
   ) +
   labs(
     title = "Histogram of Follower/Following Rate by Account Type",

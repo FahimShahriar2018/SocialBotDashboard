@@ -370,7 +370,7 @@ output$download_ffr_hist <- downloadHandler(
       )
   })
 
-  # ---- Interactive Story (delegated to module) ----
+  # ---- Interactive Story ----
   interactive_story_server(input, output, session, df)
 
   # ---- AI-generated Graph ----
@@ -413,7 +413,7 @@ output$download_ffr_hist <- downloadHandler(
     }
   )
 
-  # ------------------- Analysis Report Generation + Download (FIXED) -------------------
+  # ------------------- Analysis Report Generation + Download -------------------
 
   report_file <- reactiveVal(NULL)
 
