@@ -56,7 +56,7 @@ An interactive R/Shiny dashboard and analysis report for exploring **bot vs huma
 └── scripts/
     └── make_ffr_hist_animation.R  # create animated GIF
 ```
-## Requirements
+## ✔ Requirements
 - R (recommended: R 4.x)
 - Packages:
   - shiny
@@ -69,3 +69,51 @@ An interactive R/Shiny dashboard and analysis report for exploring **bot vs huma
   - knitr
   - (optional for animation) gganimate, gifski
 
+Install Packages:
+
+```text
+install.packages(c(
+  "shiny","ggplot2","plotly","dplyr","tidyr","readxl",
+  "rmarkdown","knitr"
+))
+
+# Optional animation support
+install.packages(c("gganimate","gifski"))
+```
+## ▶ How to Run the Dashboard
+1. Clone the repo:
+```text
+git clone <your-repo-url>
+cd <your-repo-folder>
+```
+2. Make sure **SocialBot.xlsx** is in the project root.
+3. Run the app in R:
+```text
+shiny::runApp()
+```
+## 📃 Generate the Analysis Report (PDF)
+From the dashboard:
+1. Go to Report / Download
+2. Click Generate Analysis Report
+3. Then click Download Analysis Report (PDF)
+
+The PDF is generated using:
+- SocialBot_report.Rmd
+
+## 👌 Create Animated Histogram (gganimate)
+If your repo includes the script:
+```text
+source("make_ffr_hist_animation.R")
+```
+This generates:
+- www/ffr_hist_animated.gif
+
+You can then display it in the dashboard using **tags$img(src="ffr_hist_animated.gif", ...)**.
+
+## 👥 Authors
+- Fahim Shahriar
+- Adib Abzaal
+
+## 📌 Notes
+- This project was developed for an academic Data Visualization course project.
+- The dashboard focuses on explainable visual analytics to compare bot and human account behavior.
