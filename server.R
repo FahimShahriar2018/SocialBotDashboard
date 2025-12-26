@@ -199,7 +199,7 @@ output$download_ffr_hist <- downloadHandler(
   filename = function() paste0("hist_follower_follow_rate_current_", Sys.Date(), ".svg"),
   content = function(file) {
 
-    # Match the animated histogram style
+    # the animated histogram style
     x_min <- 0
     x_max <- 1
     binwidth <- 0.025
@@ -313,7 +313,7 @@ output$download_ffr_hist <- downloadHandler(
     }
   )
 
-  # ---- PCA SECTION ----
+  # ---- PCA Section ----
 
   output$pca_pair1 <- renderPlot({
     ggplot(df, aes(x = follower_follow_rate, y = cvar_url, color = is_bot)) +

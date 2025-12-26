@@ -36,7 +36,7 @@ anim <- animate(
   fps = 15
 )
 
-# Make sure www folder exists
+# check/create www folder exists
 if (!dir.exists("www")) dir.create("www")
 
 # Save GIF
